@@ -2,8 +2,6 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT
 from matplotlib.figure import Figure
 
-import pandas as pd
-
 from PyQt5.QtWidgets import (QWidget, QVBoxLayout)
 
 import os
@@ -17,14 +15,15 @@ from logic.data_object import *
 class MPLCanvas(QWidget):
     def __init__(self, data_obj: DataObject, parent=None):
         super().__init__(parent)
+        self.setMinimumWidth(800)
 
         self.data_obj = data_obj
 
         fig = Figure(figsize=(8, 8))
         self.can = FigureCanvasQTAgg(fig)
-        self.toolbar = NavigationToolbar2QT(self.can, self)
+        # self.toolbar = NavigationToolbar2QT(self.can, self)
         layout = QVBoxLayout(self)
-        layout.addWidget(self.toolbar)
+        # layout.addWidget(self.toolbar)
         layout.addWidget(self.can)
 
         # here you can set up your figure/axis

@@ -13,6 +13,7 @@ class DataObject():
         self.X = 0
         self.Y = 1
         self.omit = []
+        print(self.df.shape)
 
     def get_X_col(self):
         return self.df.iloc[:, self.X]
@@ -23,10 +24,12 @@ class DataObject():
     def drop_row(self, indices):
         self.df.drop(indices, inplace=True)
         self.df.reset_index(drop=True, inplace=True)
+        print(self.df.shape)
 
     def drop_col(self, indices):
         self.df.drop(self.df.columns[indices], axis=1, inplace=True)
         self.df.reset_index(drop=True, inplace=True)
+        print(self.df.shape)
     
     def columns(self):
         return self.df.columns

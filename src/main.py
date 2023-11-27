@@ -11,9 +11,9 @@ if __name__ == "__main__":
     d_obj = data_object.read_csv("weather.csv")
     d_handler = data_handler.DataHandler(d_obj)
     canvas = mpl_canvas.MPLCanvas(d_obj)
-    window = main_window.MainWindow(canvas, d_obj)
+    window = main_window.MainWindow(canvas, d_handler, d_obj)
 
-    d_handler.show()
+    # d_handler.show()
     window.show()
 
     app.exec_()

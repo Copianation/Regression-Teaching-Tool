@@ -1,6 +1,7 @@
 from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import (QApplication, QCheckBox, QDialog, QPushButton,
-        QTableWidget, QTableWidgetItem, QGridLayout, QDialogButtonBox)
+        QTableWidget, QTableWidgetItem, QGridLayout, QDialogButtonBox, QGroupBox,
+        QVBoxLayout)
 import threading
 
 import os
@@ -15,6 +16,14 @@ item = QTableWidgetItem(' ')
 DEFAULT_BRUSH = item.background()
 X_BRUSH = QColor(200, 200, 255)
 Y_BRUSH = QColor(255, 200, 200)
+
+def group_box_factory(group_name, *buttons):
+    groupBox = QGroupBox(group_name)
+    layout = QVBoxLayout()
+    for button in buttons:
+        layout.addWidget(button)
+    groupBox.setLayout(layout)
+    return groupBox
 
 class DataHandler(QDialog):
     def __init__(self, data_obj: DataObject = None, parent = None):
@@ -36,7 +45,6 @@ class DataHandler(QDialog):
         n_rows, n_cols = self.data_obj.shape()
         self.tableWidget = QTableWidget(n_rows, n_cols)
         self.tableWidget.setHorizontalHeaderLabels(self.data_obj.columns())
-        self.tableWidget.horizontalHeader
 
         for row in range(n_rows):
             for col in range(n_cols):
@@ -69,10 +77,6 @@ class DataHandler(QDialog):
 
     
     def createButtons(self):
-        self.buttonBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
-        self.buttonBox.accepted.connect(self.confirm)
-        self.buttonBox.rejected.connect(self.reject)
-
         self.selectXButton = QPushButton("Select X")
         self.selectXButton.clicked.connect(self.selectX)
 
@@ -87,23 +91,21 @@ class DataHandler(QDialog):
 
 
     def layout(self):
-        control_layout = QGridLayout()
-        control_layout.addWidget(self.selectXButton, 0, 0)
-        control_layout.addWidget(self.selectYButton, 0, 1)
-        control_layout.addWidget(self.dropRowButton, 1, 0, 1, 2)
-        control_layout.addWidget(self.dropColButton, 2, 0, 1, 2)
+        group_xy = group_box_factory("Set X-Y", self.selectXButton, self.selectYButton)
+        group_cleaning = group_box_factory("Data Cleaning", self.dropRowButton, self.dropColButton)
+
+        control_layout = QVBoxLayout()
+        control_layout.addWidget(group_xy)
+        control_layout.addWidget(group_cleaning)
 
         layout = QGridLayout()
-        layout.addLayout(control_layout, 0, 0, 4, 1)
-        layout.addWidget(self.tableWidget, 0, 2, 4, 2)
-        layout.addWidget(self.buttonBox, 4, 3)
+        layout.addLayout(control_layout, 0, 2, 4, 2)
+
+        self.tableWidget.setMinimumWidth(500)
+        layout.addWidget(self.tableWidget, 0, 0, 4, 1)
+        
 
         self.setLayout(layout)
-
-    
-    def confirm(self):
-        # TODO
-        self.accept()
 
 
     def selectX(self):
@@ -138,7 +140,10 @@ class DataHandler(QDialog):
                 for col in range(n_cols):
                     if self.tableWidget.item(row, col).isSelected():
                         indices.append(row)
+                        break
             self.data_obj.drop_row(indices)
+            for _ in range(len(indices)):
+                self.tableWidget.removeRow(0)
 
         with threading.Lock():
             dropSelectedRow()
@@ -151,9 +156,13 @@ class DataHandler(QDialog):
             n_rows, n_cols = self.data_obj.shape()
             for row in range(n_rows):
                 for col in range(n_cols):
+                    if col in indices: continue
                     if self.tableWidget.item(row, col).isSelected():
                         indices.append(col)
             self.data_obj.drop_col(indices)
+            for _ in range(len(indices)):
+                self.tableWidget.removeColumn(0)
+            self.tableWidget.setHorizontalHeaderLabels(self.data_obj.columns())
 
         with threading.Lock():
             dropSelectedCol()

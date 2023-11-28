@@ -1,5 +1,7 @@
 from PyQt5.QtWidgets import (QApplication, QPushButton, QVBoxLayout,
-            QGridLayout, QMainWindow, QMenuBar, QMenu, QWidget)
+            QGridLayout, QMainWindow, QMenuBar, QMenu, QWidget, QSplitter,
+            QHBoxLayout)
+from PyQt5.QtCore import Qt
 import pandas as pd
 
 import os
@@ -10,6 +12,7 @@ sys.path.append(path)
 from logic.data_object import *
 from application.mpl_canvas import MPLCanvas
 from application.data_handler import DataHandler
+from application.data_tab import DataTab
 
 
 def layout(layout_func):
@@ -21,35 +24,35 @@ def layout(layout_func):
 
 
 class MainWindow(QMainWindow):
-    def __init__(self, canvas: MPLCanvas, data_handler: DataHandler, data_obj: DataObject = None):
+    def __init__(self, canvas: MPLCanvas, data_tab: DataTab, data_obj: DataObject = None):
         super().__init__()
 
         self.setWindowTitle('Main Window')
-        self.resize(1200, 1000)
+        self.resize(1400, 1000)
+        self.setWindowFlag(Qt.WindowMinimizeButtonHint, True)
+        self.setWindowFlag(Qt.WindowMaximizeButtonHint, True)
 
         self.data_obj = data_obj
 
         self.canvas = canvas
-        self.data_handler = data_handler
+        self.data_tab = data_tab
 
-        self.btn_plot = QPushButton('plot', self)
-        self.btn_plot.clicked.connect(self.canvas.plot_data)
-
-        self.add_data_handler()
+        self.add_data_tab()
 
     @layout
     def default_layout(self):
         layout = QGridLayout()
         layout.addWidget(self.canvas)
-        layout.addWidget(self.btn_plot)
         return layout
 
     @layout
-    def add_data_handler(self):
-        layout = QGridLayout()
-        layout.addWidget(self.canvas, 0, 0, 1, 1)
-        layout.addWidget(self.btn_plot)
-        layout.addWidget(self.data_handler, 0, 1, 3, 2)
+    def add_data_tab(self):
+        layout = QHBoxLayout()
+        splitter = QSplitter()
+        splitter.setHandleWidth(20)
+        splitter.addWidget(self.canvas)
+        splitter.addWidget(self.data_tab)
+        layout.addWidget(splitter)
         return layout
 
 
@@ -60,6 +63,7 @@ if __name__ == '__main__':
     app = QApplication([])
     canvas = MPLCanvas(d_obj)
     d_handler = DataHandler(d_obj)
-    qt_app = MainWindow(canvas, d_handler, d_obj)
+    d_tab = DataTab(d_handler)
+    qt_app = MainWindow(canvas, d_tab, d_obj)
     qt_app.show()
     app.exec_()

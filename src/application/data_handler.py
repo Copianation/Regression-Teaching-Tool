@@ -1,6 +1,6 @@
 from PyQt5.QtGui import QColor
-from PyQt5.QtWidgets import (QApplication, QCheckBox, QDialog, QPushButton,
-        QTableWidget, QTableWidgetItem, QGridLayout, QDialogButtonBox, QGroupBox,
+from PyQt5.QtWidgets import (QApplication, QWidget, QPushButton,
+        QTableWidget, QTableWidgetItem, QGridLayout, QGroupBox,
         QVBoxLayout)
 import threading
 
@@ -10,6 +10,7 @@ path = os.path.join(os.path.dirname(__file__), os.pardir)
 sys.path.append(path)
 
 from logic.data_object import *
+from util.app_util import *
 
 
 item = QTableWidgetItem(' ')
@@ -17,15 +18,8 @@ DEFAULT_BRUSH = item.background()
 X_BRUSH = QColor(200, 200, 255)
 Y_BRUSH = QColor(255, 200, 200)
 
-def group_box_factory(group_name, *buttons):
-    groupBox = QGroupBox(group_name)
-    layout = QVBoxLayout()
-    for button in buttons:
-        layout.addWidget(button)
-    groupBox.setLayout(layout)
-    return groupBox
 
-class DataHandler(QDialog):
+class DataHandler(QWidget):
     def __init__(self, data_obj: DataObject = None, parent = None):
         super().__init__(parent)
         self.data_obj = data_obj
@@ -46,15 +40,10 @@ class DataHandler(QDialog):
         self.tableWidget = QTableWidget(n_rows, n_cols)
         self.tableWidget.setHorizontalHeaderLabels(self.data_obj.columns())
 
-        for row in range(n_rows):
-            for col in range(n_cols):
-                item = QTableWidgetItem(str(self.data_obj.iloc(row, col)))
-                if col == self.data_obj.X: item.setBackground(X_BRUSH)
-                if col == self.data_obj.Y: item.setBackground(Y_BRUSH)
-                self.tableWidget.setItem(row, col, item)
+        self.updateTableContent()
 
 
-    def updateTable(self):
+    def updateTableContent(self):
         n_rows, n_cols = self.data_obj.shape()
         for row in range(n_rows):
             for col in range(n_cols):
@@ -77,33 +66,29 @@ class DataHandler(QDialog):
 
     
     def createButtons(self):
-        self.selectXButton = QPushButton("Select X")
-        self.selectXButton.clicked.connect(self.selectX)
-
-        self.selectYButton = QPushButton("Select Y")
-        self.selectYButton.clicked.connect(self.selectY)
-
-        self.dropRowButton = QPushButton("Delete row")
-        self.dropRowButton.clicked.connect(self.dropRow)
-
-        self.dropColButton = QPushButton("Delete column")
-        self.dropColButton.clicked.connect(self.dropCol)
+        self.select_X_btn = btn_factory("Select X", self.selectX)
+        self.select_Y_btn = btn_factory("Select Y", self.selectY)
+        self.drop_row_btn = btn_factory("Delete row", self.dropRow)
+        self.drop_col_btn = btn_factory("Delete column", self.dropCol)
+        self.dropna_btn = btn_factory("Drop Na", self.dropna)
+        self.reset_btn = btn_factory("Reset data", self.reset)
 
 
     def layout(self):
-        group_xy = group_box_factory("Set X-Y", self.selectXButton, self.selectYButton)
-        group_cleaning = group_box_factory("Data Cleaning", self.dropRowButton, self.dropColButton)
+        group_xy = group_box_factory("Set X-Y", self.select_X_btn, self.select_Y_btn)
+        group_cleaning = group_box_factory("Data Cleaning", self.drop_row_btn, self.drop_col_btn, self.dropna_btn)
 
         control_layout = QVBoxLayout()
+        control_layout.addStretch()
         control_layout.addWidget(group_xy)
         control_layout.addWidget(group_cleaning)
+        control_layout.addWidget(self.reset_btn)
 
         layout = QGridLayout()
         layout.addLayout(control_layout, 0, 2, 4, 2)
 
-        self.tableWidget.setMinimumWidth(500)
+        self.tableWidget.setMinimumWidth(400)
         layout.addWidget(self.tableWidget, 0, 0, 4, 1)
-        
 
         self.setLayout(layout)
 
@@ -147,7 +132,7 @@ class DataHandler(QDialog):
 
         with threading.Lock():
             dropSelectedRow()
-            self.updateTable()
+            self.updateTableContent()
 
 
     def dropCol(self):
@@ -166,11 +151,26 @@ class DataHandler(QDialog):
 
         with threading.Lock():
             dropSelectedCol()
-            self.updateTable()
+            self.updateTableContent()
+
+
+    def dropna(self):
+        self.data_obj.dropna()
+        self.tableWidget.setRowCount(self.data_obj.shape()[0])
+        self.updateTableContent()
+
+    def reset(self):
+        self.data_obj.reset()
+        n_rows, n_cols = self.data_obj.shape()
+        self.tableWidget.setRowCount(n_rows)
+        self.tableWidget.setColumnCount(n_cols)
+        self.tableWidget.setHorizontalHeaderLabels(self.data_obj.columns())
+        self.updateTableContent()
+
 
 
 if __name__ == '__main__':
-    do = read_csv("weather.csv")
+    do = read_csv("titanic.csv")
 
     app = QApplication([])
     data_handler = DataHandler(do)

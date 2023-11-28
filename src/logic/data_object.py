@@ -9,27 +9,31 @@ class DataObject():
         if df is None:
             df = pd.DataFrame(0, index=range(8), columns=['X', 'Y'])
 
-        self.df = df
+        self.original_df = df
+        self.df = df.copy()
         self.X = 0
         self.Y = 1
-        self.omit = []
-        print(self.df.shape)
 
     def get_X_col(self):
         return self.df.iloc[:, self.X]
     
     def get_Y_col(self):
         return self.df.iloc[:, self.Y]
+    
+    def reset(self):
+        self.df = self.original_df.copy()
+
+    def dropna(self):
+        self.df.dropna(inplace=True)
+        self.df.reset_index(drop=True, inplace=True)
 
     def drop_row(self, indices):
         self.df.drop(indices, inplace=True)
         self.df.reset_index(drop=True, inplace=True)
-        print(self.df.shape)
 
     def drop_col(self, indices):
         self.df.drop(self.df.columns[indices], axis=1, inplace=True)
         self.df.reset_index(drop=True, inplace=True)
-        print(self.df.shape)
     
     def columns(self):
         return self.df.columns

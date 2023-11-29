@@ -9,16 +9,16 @@ import sys
 path = os.path.join(os.path.dirname(__file__), os.pardir)
 sys.path.append(path)
 
-from logic.data_object import *
+from logic.plot_data import *
 from util.app_util import *
 
 
 class MPLCanvas(QWidget):
-    def __init__(self, data_obj: DataObject, parent=None):
+    def __init__(self, plt_data: PlotData, parent=None):
         super().__init__(parent)
         self.setMinimumWidth(800)
 
-        self.data_obj = data_obj
+        self.plt_data = plt_data
 
         fig = Figure(figsize=(8, 8))
         self.can = FigureCanvasQTAgg(fig)
@@ -37,8 +37,8 @@ class MPLCanvas(QWidget):
     def plot_relation(self):
         self.ax.cla()
 
-        label = f"{self.data_obj.columns()[self.data_obj.X]} - {self.data_obj.columns()[self.data_obj.Y]}"
-        self.ax.scatter(self.data_obj.get_X_col(), self.data_obj.get_Y_col(), label=label)
+        label = f"{self.plt_data.columns()[1]} - {self.plt_data.columns()[0]}"
+        self.ax.scatter(self.plt_data.get_X_col(), self.plt_data.get_Y_col(), label=label)
         self.ax.grid(True)
         self.ax.legend()
         self.can.figure.tight_layout()
@@ -47,8 +47,8 @@ class MPLCanvas(QWidget):
     def plot_X(self):
         self.ax.cla()
 
-        label = f"{self.data_obj.columns()[self.data_obj.X]}"
-        self.ax.hist(self.data_obj.get_X_col(), label=label, bins=20)
+        label = f"{self.plt_data.columns()[1]}"
+        self.ax.hist(self.plt_data.get_X_col(), label=label, bins=20)
         self.ax.legend()
         self.can.figure.tight_layout()
         self.can.draw()
@@ -56,8 +56,8 @@ class MPLCanvas(QWidget):
     def plot_Y(self):
         self.ax.cla()
 
-        label = f"{self.data_obj.columns()[self.data_obj.Y]}"
-        self.ax.hist(self.data_obj.get_Y_col(), label=label, bins=20)
+        label = f"{self.plt_data.columns()[0]}"
+        self.ax.hist(self.plt_data.get_Y_col(), label=label, bins=20)
         self.ax.legend()
         self.can.figure.tight_layout()
         self.can.draw()

@@ -11,14 +11,17 @@ class DataObject():
 
         self.original_df = df
         self.df = df.copy()
-        self.X = 0
-        self.Y = 1
+        self.X = 1
+        self.Y = 0
 
     def get_X_col(self):
         return self.df.iloc[:, self.X]
     
     def get_Y_col(self):
         return self.df.iloc[:, self.Y]
+    
+    def get_plot_dataframe(self):
+        return self.df.iloc[:, [self.Y, self.X]]
     
     def reset(self):
         self.df = self.original_df.copy()

@@ -9,7 +9,9 @@ import sys
 path = os.path.join(os.path.dirname(__file__), os.pardir)
 sys.path.append(path)
 
+from application.plot_data_handler import *
 from logic.data_object import *
+from logic.plot_data import *
 from util.app_util import *
 
 
@@ -19,10 +21,21 @@ X_BRUSH = QColor(200, 200, 255)
 Y_BRUSH = QColor(255, 200, 200)
 
 
+def update_plot_data(func):
+    def wrapper(self):
+        func(self)
+        self.plt_data.retrieve_plt_df()
+        self.plt_d_handler.updateTableContent()
+    return wrapper
+
+
+
 class DataHandler(QWidget):
-    def __init__(self, data_obj: DataObject = None, parent = None):
+    def __init__(self, data_obj: DataObject, plt_data: PlotData, plt_d_handler: PltDataHandler, parent = None):
         super().__init__(parent)
         self.data_obj = data_obj
+        self.plt_data = plt_data
+        self.plt_d_handler = plt_d_handler
 
         self.setWindowTitle("Data Handler")
         self.resize(1200, 1000)
@@ -38,12 +51,12 @@ class DataHandler(QWidget):
             return
         n_rows, n_cols = self.data_obj.shape()
         self.tableWidget = QTableWidget(n_rows, n_cols)
-        self.tableWidget.setHorizontalHeaderLabels(self.data_obj.columns())
 
         self.updateTableContent()
 
 
     def updateTableContent(self):
+        self.tableWidget.setHorizontalHeaderLabels(self.data_obj.columns())
         n_rows, n_cols = self.data_obj.shape()
         for row in range(n_rows):
             for col in range(n_cols):
@@ -92,7 +105,7 @@ class DataHandler(QWidget):
 
         self.setLayout(layout)
 
-
+    @update_plot_data
     def selectX(self):
         def setX():
             n_rows, n_cols = self.data_obj.shape()
@@ -104,7 +117,7 @@ class DataHandler(QWidget):
         setX()
         self.updateTableColor()
                 
-
+    @update_plot_data
     def selectY(self):
         def setY():
             n_rows, n_cols = self.data_obj.shape()
@@ -116,7 +129,7 @@ class DataHandler(QWidget):
         setY()
         self.updateTableColor()
 
-
+    @update_plot_data
     def dropRow(self):
         def dropSelectedRow():
             indices = []
@@ -134,7 +147,7 @@ class DataHandler(QWidget):
             dropSelectedRow()
             self.updateTableContent()
 
-
+    @update_plot_data
     def dropCol(self):
         def dropSelectedCol():
             indices = []
@@ -153,7 +166,7 @@ class DataHandler(QWidget):
             dropSelectedCol()
             self.updateTableContent()
 
-
+    @update_plot_data
     def dropna(self):
         self.data_obj.dropna()
         self.tableWidget.setRowCount(self.data_obj.shape()[0])

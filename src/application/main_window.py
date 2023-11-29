@@ -54,16 +54,3 @@ class MainWindow(QMainWindow):
         splitter.addWidget(self.data_tab)
         layout.addWidget(splitter)
         return layout
-
-
-
-
-if __name__ == '__main__':
-    d_obj = DataObject()
-    app = QApplication([])
-    canvas = MPLCanvas(d_obj)
-    d_handler = DataHandler(d_obj)
-    d_tab = DataTab(d_handler)
-    qt_app = MainWindow(canvas, d_tab, d_obj)
-    qt_app.show()
-    app.exec_()

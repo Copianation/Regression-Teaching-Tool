@@ -4,11 +4,6 @@ from PyQt5.QtWidgets import (QApplication, QWidget, QPushButton,
         QVBoxLayout)
 import threading
 
-import os
-import sys
-path = os.path.join(os.path.dirname(__file__), os.pardir)
-sys.path.append(path)
-
 from logic.plot_data import *
 from util.app_util import *
 

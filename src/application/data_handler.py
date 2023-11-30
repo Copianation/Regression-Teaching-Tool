@@ -1,18 +1,14 @@
 from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import (QApplication, QWidget, QPushButton,
         QTableWidget, QTableWidgetItem, QGridLayout, QGroupBox,
-        QVBoxLayout)
+        QVBoxLayout, QLineEdit)
 import threading
-
-import os
-import sys
-path = os.path.join(os.path.dirname(__file__), os.pardir)
-sys.path.append(path)
 
 from application.plot_data_handler import *
 from logic.data_object import *
 from logic.plot_data import *
 from util.app_util import *
+from util import cleaning
 
 
 item = QTableWidgetItem(' ')
@@ -83,13 +79,17 @@ class DataHandler(QWidget):
         self.select_Y_btn = btn_factory("Select Y", self.selectY)
         self.drop_row_btn = btn_factory("Delete row", self.dropRow)
         self.drop_col_btn = btn_factory("Delete column", self.dropCol)
-        self.dropna_btn = btn_factory("Drop Na", self.dropna)
+        self.clean_btn = btn_factory("Drop if", self.dropif)
         self.reset_btn = btn_factory("Reset data", self.reset)
+        self.condition_entry = QLineEdit()
 
 
     def layout(self):
         group_xy = group_box_factory("Set X-Y", self.select_X_btn, self.select_Y_btn)
-        group_cleaning = group_box_factory("Data Cleaning", self.drop_row_btn, self.drop_col_btn, self.dropna_btn)
+        cleaning_layout = QGridLayout()
+        cleaning_layout.addWidget(self.clean_btn, 0, 0)
+        cleaning_layout.addWidget(self.condition_entry, 0, 1)
+        group_cleaning = group_box_factory("Data Cleaning", self.drop_row_btn, self.drop_col_btn, cleaning_layout)
 
         control_layout = QVBoxLayout()
         control_layout.addStretch()
@@ -167,8 +167,9 @@ class DataHandler(QWidget):
             self.updateTableContent()
 
     @update_plot_data
-    def dropna(self):
-        self.data_obj.dropna()
+    def dropif(self):
+        command = self.condition_entry.text()
+        self.data_obj.dropif(cleaning.clean(command))
         self.tableWidget.setRowCount(self.data_obj.shape()[0])
         self.updateTableContent()
 

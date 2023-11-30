@@ -26,6 +26,14 @@ class DataObject():
     def reset(self):
         self.df = self.original_df.copy()
 
+    def dropif(self, func):
+        """
+        func(df: pd.DataFrame) -> indices to drop
+        """
+        if func is None: return
+        self.df.drop(func(self.df), inplace=True)
+        self.df.reset_index(drop=True, inplace=True)
+
     def dropna(self):
         self.df.dropna(inplace=True)
         self.df.reset_index(drop=True, inplace=True)

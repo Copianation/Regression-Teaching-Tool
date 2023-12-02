@@ -1,10 +1,6 @@
 import pandas as pd
 
-
-import os
-import sys
-path = os.path.join(os.path.dirname(__file__), os.pardir)
-sys.path.append(path)
+from sklearn.linear_model import LinearRegression
 
 from logic.data_object import *
 
@@ -17,15 +13,24 @@ class PlotData():
         self.transformation = "none"
 
 
+    
+    def linera_regression(self):
+        model = LinearRegression()
+        model.fit(self.get_X_col(), self.get_Y_col())
+        coef = model.coef_[0][0]
+        intercept = model.intercept_[0]
+        return "linear", coef, intercept
+
+
     def retrieve_plt_df(self):
         self.original_plt_df = self.data_obj.get_plot_dataframe()
         self.plt_df = self.data_obj.get_plot_dataframe()
 
     def get_X_col(self):
-        return self.plt_df.iloc[:, 1]
+        return self.plt_df.iloc[:, 1].values.reshape(-1, 1)
     
     def get_Y_col(self):
-        return self.plt_df.iloc[:, 0]
+        return self.plt_df.iloc[:, 0].values.reshape(-1, 1)
 
     def drop_row(self, indices):
         self.plt_df.drop(indices, inplace=True)

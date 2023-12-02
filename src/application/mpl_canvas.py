@@ -1,15 +1,12 @@
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT
 from matplotlib.figure import Figure
+import numpy as np
 
 from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QPushButton)
 
-import os
-import sys
-path = os.path.join(os.path.dirname(__file__), os.pardir)
-sys.path.append(path)
-
 from logic.plot_data import *
+from logic.regression import Regression
 from util.app_util import *
 
 
@@ -60,4 +57,18 @@ class MPLCanvas(QWidget):
         self.ax.hist(self.plt_data.get_Y_col(), label=label, bins=20)
         self.ax.legend()
         self.can.figure.tight_layout()
+        self.can.draw()
+
+    def plot_regression(self, regression: Regression):
+        self.plot_relation()
+        intercept = regression.intercept
+        coef = regression.coef
+
+        min = np.min(self.plt_data.get_X_col())
+        max = np.max(self.plt_data.get_X_col())
+        x = np.linspace(min, max, 100)
+        y = regression.link(intercept + coef * x)
+
+        self.ax.plot(x, y, color = "green", label = f"{regression.type} regression")
+        self.ax.legend()
         self.can.draw()

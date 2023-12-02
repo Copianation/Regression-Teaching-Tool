@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import (QPushButton, QGroupBox,
-        QVBoxLayout, QWidget, QLayout)
+        QVBoxLayout, QWidget, QLayout, QGridLayout)
 
 def btn_factory(name, func):
     btn = QPushButton(name)
@@ -17,3 +17,10 @@ def group_box_factory(group_name, *buttons):
             layout.addLayout(button)
     groupBox.setLayout(layout)
     return groupBox
+
+
+def couple_layout(widget1, widget2):
+    layout = QGridLayout()
+    layout.addWidget(widget1, 0, 0)
+    layout.addWidget(widget2, 0, 1)
+    return layout

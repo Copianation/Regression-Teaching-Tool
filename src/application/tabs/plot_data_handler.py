@@ -20,7 +20,6 @@ class PltDataHandler(QWidget):
         self.plt_data = plt_data
 
         self.setWindowTitle("Data Handler")
-        self.resize(1200, 1000)
 
         self.createTable()
         self.createButtons()

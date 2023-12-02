@@ -2,16 +2,9 @@ from PyQt5.QtWidgets import (QApplication, QPushButton, QVBoxLayout,
             QGridLayout, QMainWindow, QMenuBar, QMenu, QWidget, QSplitter,
             QHBoxLayout)
 from PyQt5.QtCore import Qt
-import pandas as pd
-
-import os
-import sys
-path = os.path.join(os.path.dirname(__file__), os.pardir)
-sys.path.append(path)
 
 from logic.data_object import *
 from application.mpl_canvas import MPLCanvas
-from application.data_handler import DataHandler
 from application.data_tab import DataTab
 
 

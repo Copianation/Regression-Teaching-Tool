@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import (QApplication, QWidget, QPushButton,
         QVBoxLayout, QLineEdit)
 import threading
 
-from application.plot_data_handler import *
+from application.tabs.plot_data_handler import *
 from logic.data_object import *
 from logic.plot_data import *
 from util.app_util import *
@@ -34,7 +34,6 @@ class DataHandler(QWidget):
         self.plt_d_handler = plt_d_handler
 
         self.setWindowTitle("Data Handler")
-        self.resize(1200, 1000)
 
         self.createTable()
         self.createButtons()

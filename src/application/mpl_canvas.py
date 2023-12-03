@@ -63,11 +63,14 @@ class MPLCanvas(QWidget):
         self.plot_relation()
         intercept = regression.intercept
         coef = regression.coef
+        degree = regression.degree
 
         min = np.min(self.plt_data.get_X_col())
         max = np.max(self.plt_data.get_X_col())
+
         x = np.linspace(min, max, 100)
-        y = regression.link(intercept + coef * x)
+        polynomial = intercept + np.sum([coef[i] * np.power(x, i+1) for i in range(0, degree)], axis=0)
+        y = regression.link(polynomial)
 
         self.ax.plot(x, y, color = "green", label = f"{regression.type} regression")
         self.ax.legend()

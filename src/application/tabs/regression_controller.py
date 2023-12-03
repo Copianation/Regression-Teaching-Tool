@@ -44,5 +44,5 @@ class RGController(QWidget):
         self.setLayout(layout)
 
     def fit_plt_data(self):
-        regression = fit(self.plt_data, self.famile_cbbox.currentText())
+        regression = fit(self.plt_data, self.famile_cbbox.currentText(), self.degree_cbbox.currentIndex()+1)
         self.canvas.plot_regression(regression)

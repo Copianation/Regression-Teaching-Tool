@@ -14,7 +14,7 @@ from logic import data_object, plot_data
 if __name__ == "__main__":
     app = QApplication([])
 
-    d_obj = data_object.read_csv("titanic.csv")
+    d_obj = data_object.read_csv("diabetes.csv")
     plt_data = plot_data.PlotData(d_obj)
 
     canvas = mpl_canvas.MPLCanvas(plt_data)

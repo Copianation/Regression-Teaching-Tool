@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import (QApplication, QWidget, QPushButton,
-        QTableWidget, QGridLayout, QGroupBox, QLabel,
+        QTableWidget, QGridLayout, QGroupBox, QLabel, QTextEdit,
         QVBoxLayout, QComboBox)
 from PyQt5.QtCore import Qt
 import threading
@@ -24,9 +24,10 @@ class RGController(QWidget):
     def createButtons(self):
         self.fit_btn = btn_factory("fit", self.fit_plt_data)
         self.famile_cbbox = QComboBox()
-        self.famile_cbbox.addItems(["linear", "logistic"])
+        self.famile_cbbox.addItems(["linear", "logistic", "poisson"])
         self.degree_cbbox = QComboBox()
         self.degree_cbbox.addItems([str(i) for i in range(1,6)])
+        self.summary = QTextEdit()
 
     def layout(self):
         family_label = QLabel("Family=")
@@ -37,6 +38,7 @@ class RGController(QWidget):
 
         layout = QVBoxLayout()
         layout.addStretch()
+        layout.addWidget(self.summary)
         layout.addLayout(family_layout)
         layout.addLayout(degree_layout)
         layout.addWidget(self.fit_btn)
@@ -46,3 +48,4 @@ class RGController(QWidget):
     def fit_plt_data(self):
         regression = fit(self.plt_data, self.famile_cbbox.currentText(), self.degree_cbbox.currentIndex()+1)
         self.canvas.plot_regression(regression)
+        self.summary.setHtml(regression.summary)

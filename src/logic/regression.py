@@ -8,6 +8,7 @@ from logic.plot_data import PlotData
 
 @dataclass
 class Regression:
+    summary: str
     intercept: float
     coef: List[float]
     degree: int
@@ -23,6 +24,9 @@ def fit(plt_data: PlotData, family: str, degree: int):
         case "logistic":
             f = sm.families.Binomial()
             func = lambda x: 1 / (1 + np.exp(-x))
+        case "poisson":
+            f = sm.families.Poisson()
+            func = np.exp
 
 
     columns_with_degree = [np.power(plt_data.get_X_col(), i) for i in range(1, degree+1)]
@@ -31,10 +35,19 @@ def fit(plt_data: PlotData, family: str, degree: int):
     y = plt_data.get_Y_col()
     model = sm.GLM(y, X, family=f)
     result = model.fit()
-    print(result.summary())
 
     intercept = result.params[0]
     coef = result.params[1:]
 
-    return Regression(intercept, coef, degree, family, func)
+    summary = result.summary().as_html()
+    summary = summary.replace('<th>', '<th style="font-size:26px">')
+    summary = summary.replace('<td>', '<td style="font-size:26px">')
+    summary = (
+            '<style>'
+            'th, td { text-align: left; }'
+            'td { padding-right: 16px; }'
+            '</style>'
+        ) + summary
+
+    return Regression(summary, intercept, coef, degree, family, func)
 

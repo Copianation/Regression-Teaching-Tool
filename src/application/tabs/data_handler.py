@@ -1,5 +1,5 @@
 from PyQt5.QtGui import QColor
-from PyQt5.QtWidgets import (QApplication, QWidget, QPushButton,
+from PyQt5.QtWidgets import (QApplication, QWidget, QCheckBox,
         QTableWidget, QTableWidgetItem, QGridLayout, QGroupBox,
         QVBoxLayout, QLineEdit)
 import threading
@@ -81,19 +81,22 @@ class DataHandler(QWidget):
         self.clean_btn = btn_factory("Drop if", self.dropif)
         self.reset_btn = btn_factory("Reset data", self.reset)
         self.condition_entry = QLineEdit()
+        self.cln_selected_col_checkbox = QCheckBox("Only clean selected columns")
+        self.cln_selected_col_checkbox.setChecked(True)
 
 
     def layout(self):
-        group_xy = group_box_factory("Set X-Y", self.select_X_btn, self.select_Y_btn)
-        cleaning_layout = QGridLayout()
-        cleaning_layout.addWidget(self.clean_btn, 0, 0)
-        cleaning_layout.addWidget(self.condition_entry, 0, 1)
-        group_cleaning = group_box_factory("Data Cleaning", self.drop_row_btn, self.drop_col_btn, cleaning_layout)
+        group_list = []
+        group_list.append(group_box_factory("Set X-Y", self.select_X_btn, self.select_Y_btn))
+        group_list.append(group_box_factory("Table Adjustment", self.drop_row_btn, self.drop_col_btn))
+
+        cleaning_layout = couple_layout(self.clean_btn, self.condition_entry)
+        group_list.append(group_box_factory("Data Cleaning", self.cln_selected_col_checkbox, cleaning_layout))
 
         control_layout = QVBoxLayout()
         control_layout.addStretch()
-        control_layout.addWidget(group_xy)
-        control_layout.addWidget(group_cleaning)
+        for group in group_list:
+            control_layout.addWidget(group)
         control_layout.addWidget(self.reset_btn)
 
         layout = QGridLayout()
@@ -131,13 +134,7 @@ class DataHandler(QWidget):
     @update_plot_data
     def dropRow(self):
         def dropSelectedRow():
-            indices = []
-            n_rows, n_cols = self.data_obj.shape()
-            for row in range(n_rows):
-                for col in range(n_cols):
-                    if self.tableWidget.item(row, col).isSelected():
-                        indices.append(row)
-                        break
+            indices = get_selected_columns(self.tableWidget)
             self.data_obj.drop_row(indices)
             for _ in range(len(indices)):
                 self.tableWidget.removeRow(0)
@@ -168,7 +165,12 @@ class DataHandler(QWidget):
     @update_plot_data
     def dropif(self):
         command = self.condition_entry.text()
-        self.data_obj.dropif(cleaning.clean(command))
+        if self.cln_selected_col_checkbox.isChecked():
+            selected_cols = get_selected_columns(self.tableWidget)
+        else:
+            _, n_cols = self.data_obj.shape()
+            selected_cols = range(n_cols)
+        self.data_obj.dropif(cleaning.clean(command, selected_cols))
         self.tableWidget.setRowCount(self.data_obj.shape()[0])
         self.updateTableContent()
 

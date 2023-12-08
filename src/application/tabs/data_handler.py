@@ -1,6 +1,6 @@
 from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import (QApplication, QWidget, QCheckBox,
-        QTableWidget, QTableWidgetItem, QGridLayout, QGroupBox,
+        QTableWidget, QTableWidgetItem, QGridLayout,
         QVBoxLayout, QLineEdit)
 import threading
 

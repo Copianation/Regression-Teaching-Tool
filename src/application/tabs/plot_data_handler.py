@@ -1,11 +1,12 @@
 from PyQt5.QtGui import QColor
-from PyQt5.QtWidgets import (QApplication, QWidget, QPushButton,
-        QTableWidget, QTableWidgetItem, QGridLayout, QGroupBox,
+from PyQt5.QtWidgets import (QApplication, QWidget, QPushButton, QLineEdit,
+        QTableWidget, QTableWidgetItem, QGridLayout, QGroupBox, QCheckBox,
         QVBoxLayout)
 import threading
 
 from logic.plot_data import *
 from util.app_util import *
+from util import cleaning
 
 
 item = QTableWidgetItem(' ')
@@ -51,16 +52,24 @@ class PltDataHandler(QWidget):
     
     def createButtons(self):
         self.drop_row_btn = btn_factory("Delete row", self.dropRow)
-        self.dropna_btn = btn_factory("Drop Na", self.dropna)
+        self.clean_btn = btn_factory("Drop if", self.dropif)
         self.reset_btn = btn_factory("Reset data", self.reset)
+        self.condition_entry = QLineEdit()
+        self.cln_selected_col_checkbox = QCheckBox("Only clean selected columns")
+        self.cln_selected_col_checkbox.setChecked(True)
 
 
     def layout(self):
-        group_cleaning = group_box_factory("Data Cleaning", self.drop_row_btn, self.dropna_btn)
+        group_list = []
+        group_list.append(group_box_factory("Table Adjustment", self.drop_row_btn))
+
+        cleaning_layout = couple_layout(self.clean_btn, self.condition_entry)
+        group_list.append(group_box_factory("Data Cleaning", self.cln_selected_col_checkbox, cleaning_layout))
 
         control_layout = QVBoxLayout()
         control_layout.addStretch()
-        control_layout.addWidget(group_cleaning)
+        for group in group_list:
+            control_layout.addWidget(group)
         control_layout.addWidget(self.reset_btn)
 
         layout = QGridLayout()
@@ -90,10 +99,16 @@ class PltDataHandler(QWidget):
             self.updateTableContent()
 
 
-    def dropna(self):
-        self.plt_data.dropna()
+    def dropif(self):
+        command = self.condition_entry.text()
+        if self.cln_selected_col_checkbox.isChecked():
+            selected_cols = get_selected_columns(self.tableWidget)
+        else:
+            selected_cols = [0, 1]
+        self.plt_data.dropif(cleaning.clean(command, selected_cols))
         self.tableWidget.setRowCount(self.plt_data.shape()[0])
         self.updateTableContent()
+
 
     def reset(self):
         self.plt_data.reset()

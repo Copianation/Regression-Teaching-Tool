@@ -1,6 +1,6 @@
 import pandas as pd
 
-from sklearn.linear_model import LinearRegression
+import numpy as np
 
 from logic.data_object import *
 
@@ -10,17 +10,6 @@ class PlotData():
         self.data_obj = data_obj
         self.original_plt_df = data_obj.get_plot_dataframe()
         self.plt_df = data_obj.get_plot_dataframe()
-        self.transformation = "none"
-
-
-    
-    def linera_regression(self):
-        model = LinearRegression()
-        model.fit(self.get_X_col(), self.get_Y_col())
-        coef = model.coef_[0][0]
-        intercept = model.intercept_[0]
-        return "linear", coef, intercept
-
 
     def retrieve_plt_df(self):
         self.original_plt_df = self.data_obj.get_plot_dataframe()
@@ -42,6 +31,14 @@ class PlotData():
 
     def reset(self):
         self.plt_df = self.original_plt_df.copy()
+
+    def dropif(self, func):
+        """
+        func(df: pd.DataFrame) -> indices to drop
+        """
+        if func is None: return
+        self.plt_df.drop(func(self.plt_df), inplace=True)
+        self.plt_df.reset_index(drop=True, inplace=True)
 
     def columns(self):
         return self.plt_df.columns

@@ -45,7 +45,7 @@ def fit(plt_data: PlotData, family: str, degree: int):
     summary = (
             '<style>'
             'th, td { text-align: left; }'
-            'td { padding-right: 16px; }'
+            'td { padding-right: 20px; }'
             '</style>'
         ) + summary
 

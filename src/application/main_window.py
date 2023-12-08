@@ -20,7 +20,7 @@ class MainWindow(QMainWindow):
     def __init__(self, canvas: MPLCanvas, data_tab: DataTab, data_obj: DataObject = None):
         super().__init__()
 
-        self.setWindowTitle('Main Window')
+        self.setWindowTitle('Regression Tool')
         self.resize(1400, 1000)
         self.setWindowFlag(Qt.WindowMinimizeButtonHint, True)
         self.setWindowFlag(Qt.WindowMaximizeButtonHint, True)

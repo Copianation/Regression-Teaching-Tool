@@ -29,25 +29,35 @@ class PltDataHandler(QWidget):
 
     def createTable(self):
         if self.plt_data is None:
-            self.tableWidget = QTableWidget(20, 10)
+            self.train_tableWidget = QTableWidget(20, 2)
+            self.test_tableWidget = QTableWidget(20, 2)
             return
-        n_rows, n_cols = self.plt_data.shape()
-        self.tableWidget = QTableWidget(n_rows, n_cols)
+        n_rows, _ = self.plt_data.shape()
+        self.train_tableWidget = QTableWidget(n_rows, 2)
+        self.test_tableWidget = QTableWidget(n_rows, 2)
 
         self.updateTableContent()
 
 
     def updateTableContent(self):
-        header = ["Y: " + self.plt_data.columns()[0], "X: " + self.plt_data.columns()[1]]
-        self.tableWidget.setHorizontalHeaderLabels(header)
-        n_rows, n_cols = self.plt_data.shape()
-        self.tableWidget.setRowCount(n_rows)
-        for row in range(n_rows):
-            for col in range(n_cols):
-                item = QTableWidgetItem(str(self.plt_data.iloc(row, col)))
-                if col == 1: item.setBackground(X_BRUSH)
-                if col == 0: item.setBackground(Y_BRUSH)
-                self.tableWidget.setItem(row, col, item)
+        train_header = ["train Y: " + self.plt_data.columns()[0], "train X: " + self.plt_data.columns()[1]]
+        test_header = ["test Y: " + self.plt_data.columns()[0], "test X: " + self.plt_data.columns()[1]]
+        self.train_tableWidget.setHorizontalHeaderLabels(train_header)
+        self.test_tableWidget.setHorizontalHeaderLabels(test_header)
+        n_train = len(self.plt_data.x_train)
+        n_test = len(self.plt_data.x_test)
+        self.train_tableWidget.setRowCount(n_train)
+        self.test_tableWidget.setRowCount(n_test)
+        for row in range(n_train):
+            x_item = QTableWidgetItem(str(self.plt_data.x_train[row, 0]))
+            y_item = QTableWidgetItem(str(self.plt_data.y_train[row, 0]))
+            self.train_tableWidget.setItem(row, 0, y_item)
+            self.train_tableWidget.setItem(row, 1, x_item)
+        for row in range(n_test):
+            x_item = QTableWidgetItem(str(self.plt_data.x_test[row, 0]))
+            y_item = QTableWidgetItem(str(self.plt_data.y_test[row, 0]))
+            self.test_tableWidget.setItem(row, 0, y_item)
+            self.test_tableWidget.setItem(row, 1, x_item)
 
     
     def createButtons(self):
@@ -55,6 +65,8 @@ class PltDataHandler(QWidget):
         self.clean_btn = btn_factory("Drop if", self.dropif)
         self.reset_btn = btn_factory("Reset data", self.reset)
         self.condition_entry = QLineEdit()
+        self.split_btn = btn_factory("Split", self.split)
+        self.split_size_entry = QLineEdit()
         self.cln_selected_col_checkbox = QCheckBox("Only clean selected columns")
         self.cln_selected_col_checkbox.setChecked(True)
 
@@ -63,6 +75,9 @@ class PltDataHandler(QWidget):
         group_list = []
         group_list.append(group_box_factory("Table Adjustment", self.drop_row_btn))
 
+        split_layout = couple_layout(self.split_btn, self.split_size_entry)
+        group_list.append(group_box_factory("Train Test Split", split_layout))
+        
         cleaning_layout = couple_layout(self.clean_btn, self.condition_entry)
         group_list.append(group_box_factory("Data Cleaning", self.cln_selected_col_checkbox, cleaning_layout))
 
@@ -75,11 +90,23 @@ class PltDataHandler(QWidget):
         layout = QGridLayout()
         layout.addLayout(control_layout, 0, 2, 4, 2)
 
-        self.tableWidget.setMinimumWidth(400)
-        layout.addWidget(self.tableWidget, 0, 0, 4, 1)
+        self.train_tableWidget.setMinimumWidth(200)
+        layout.addWidget(self.train_tableWidget, 0, 0, 4, 1)
+        self.test_tableWidget.setMinimumWidth(200)
+        layout.addWidget(self.test_tableWidget, 0, 1, 4, 1)
 
         self.setLayout(layout)
 
+    def split(self):
+        def is_float(string: str):
+            return string.replace(".", "").isnumeric()
+
+        text = self.split_size_entry.text().strip()
+        if is_float(text):
+            test_size = float(text)
+        else: test_size = 0
+        self.plt_data.train_test_split(test_size)
+        self.updateTableContent()
 
     def dropRow(self):
         def dropSelectedRow():
@@ -87,12 +114,12 @@ class PltDataHandler(QWidget):
             n_rows, n_cols = self.plt_data.shape()
             for row in range(n_rows):
                 for col in range(n_cols):
-                    if self.tableWidget.item(row, col).isSelected():
+                    if self.train_tableWidget.item(row, col).isSelected():
                         indices.append(row)
                         break
             self.plt_data.drop_row(indices)
             for _ in range(len(indices)):
-                self.tableWidget.removeRow(0)
+                self.train_tableWidget.removeRow(0)
 
         with threading.Lock():
             dropSelectedRow()
@@ -102,19 +129,19 @@ class PltDataHandler(QWidget):
     def dropif(self):
         command = self.condition_entry.text()
         if self.cln_selected_col_checkbox.isChecked():
-            selected_cols = get_selected_columns(self.tableWidget)
+            selected_cols = get_selected_columns(self.train_tableWidget)
         else:
             selected_cols = [0, 1]
         self.plt_data.dropif(cleaning.clean(command, selected_cols))
-        self.tableWidget.setRowCount(self.plt_data.shape()[0])
+        self.train_tableWidget.setRowCount(self.plt_data.shape()[0])
         self.updateTableContent()
 
 
     def reset(self):
         self.plt_data.reset()
         n_rows, n_cols = self.plt_data.shape()
-        self.tableWidget.setRowCount(n_rows)
-        self.tableWidget.setColumnCount(n_cols)
+        self.train_tableWidget.setRowCount(n_rows)
+        self.train_tableWidget.setColumnCount(n_cols)
         self.updateTableContent()
 
 

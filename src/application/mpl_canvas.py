@@ -2,6 +2,7 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT
 from matplotlib.figure import Figure
 import numpy as np
+from sklearn.neural_network import MLPRegressor
 
 from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QPushButton)
 
@@ -73,5 +74,16 @@ class MPLCanvas(QWidget):
         y = regression.link(polynomial)
 
         self.ax.plot(x, y, color = "green", label = f"{regression.type} regression")
+        self.ax.legend()
+        self.can.draw()
+
+    def plot_ann_model(self, model: MLPRegressor):
+        self.plot_relation()
+        min = np.min(self.plt_data.get_X_col())
+        max = np.max(self.plt_data.get_X_col())
+
+        x = np.linspace(min, max, 100).reshape(-1, 1)
+        y = model.predict(x)
+        self.ax.plot(x, y, color = "green", label = f"ANN")
         self.ax.legend()
         self.can.draw()

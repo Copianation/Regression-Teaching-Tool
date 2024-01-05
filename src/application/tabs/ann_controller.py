@@ -6,10 +6,10 @@ import threading
 
 from application.mpl_canvas import *
 from logic.plot_data import *
-from logic import regression
+from logic import ann
 from util.app_util import *
 
-class RGController(QWidget):
+class ANNController(QWidget):
     def __init__(self, plt_data: PlotData, canvas: MPLCanvas, parent = None):
         super().__init__(parent)
         self.plt_data = plt_data
@@ -46,6 +46,6 @@ class RGController(QWidget):
         self.setLayout(layout)
 
     def fit_plt_data(self):
-        regress = regression.fit(self.plt_data, self.famile_cbbox.currentText(), self.degree_cbbox.currentIndex()+1)
-        self.canvas.plot_regression(regress)
-        self.summary.setHtml(regress.summary)
+        model = ann.fit(self.plt_data, [10,4,4])
+        self.canvas.plot_ann_model(model)
+        self.summary.setText("Complete")

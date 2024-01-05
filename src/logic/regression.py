@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from typing import Callable, List
 import numpy as np
-import pandas as pd
 import statsmodels.api as sm
 
 from logic.plot_data import PlotData
@@ -29,10 +28,10 @@ def fit(plt_data: PlotData, family: str, degree: int):
             func = np.exp
 
 
-    columns_with_degree = [np.power(plt_data.get_X_col(), i) for i in range(1, degree+1)]
+    columns_with_degree = [np.power(plt_data.x_train, i) for i in range(1, degree+1)]
     X = np.concatenate(columns_with_degree, axis=1)
     X = sm.add_constant(X)
-    y = plt_data.get_Y_col()
+    y = plt_data.y_train
     model = sm.GLM(y, X, family=f)
     result = model.fit()
 

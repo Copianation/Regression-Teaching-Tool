@@ -28,6 +28,9 @@ class ANNController(QWidget):
         self.degree_cbbox = QComboBox()
         self.degree_cbbox.addItems([str(i) for i in range(1,6)])
         self.summary = QTextEdit()
+        font = self.summary.currentFont()
+        font.setPointSize(10)
+        self.summary.setCurrentFont(font)
 
     def layout(self):
         family_label = QLabel("Family=")
@@ -46,6 +49,5 @@ class ANNController(QWidget):
         self.setLayout(layout)
 
     def fit_plt_data(self):
-        model = ann.fit(self.plt_data, [10,4,4])
+        model = ann.fit(self.plt_data, [10,4,4], self.summary)
         self.canvas.plot_ann_model(model)
-        self.summary.setText("Complete")

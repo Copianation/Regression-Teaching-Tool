@@ -1,8 +1,7 @@
-from PyQt5.QtWidgets import (QApplication, QWidget, QPushButton,
+from PyQt5.QtWidgets import (QWidget, QPushButton,
         QTableWidget, QGridLayout, QGroupBox, QLabel, QTextEdit,
         QVBoxLayout, QComboBox)
 from PyQt5.QtCore import Qt
-import threading
 
 from application.mpl_canvas import *
 from logic.plot_data import *
@@ -17,11 +16,12 @@ class ANNController(QWidget):
 
         self.setWindowTitle("Data Handler")
 
-        self.createButtons()
+        self.create_buttons()
+        self.create_history_canvas()
         self.layout()
 
 
-    def createButtons(self):
+    def create_buttons(self):
         self.fit_btn = btn_factory("fit", self.fit_plt_data)
         self.famile_cbbox = QComboBox()
         self.famile_cbbox.addItems(["linear", "logistic", "poisson"])
@@ -32,6 +32,11 @@ class ANNController(QWidget):
         font.setPointSize(10)
         self.summary.setCurrentFont(font)
 
+    def create_history_canvas(self): 
+        fig = Figure(figsize=(6, 6))
+        self.history_can = FigureCanvasQTAgg(fig)
+        self.history_ax = self.history_can.figure.add_subplot(111)
+
     def layout(self):
         family_label = QLabel("Family=")
         degree_label = QLabel("Degree=")
@@ -41,6 +46,7 @@ class ANNController(QWidget):
 
         layout = QVBoxLayout()
         layout.addStretch()
+        layout.addWidget(self.history_can)
         layout.addWidget(self.summary)
         layout.addLayout(family_layout)
         layout.addLayout(degree_layout)
@@ -49,5 +55,12 @@ class ANNController(QWidget):
         self.setLayout(layout)
 
     def fit_plt_data(self):
-        model = ann.fit(self.plt_data, [10,4,4], self.summary)
+        model, history = ann.fit(self.plt_data, [10,4,4], self.summary)
+        loss_history = history.history['loss']
+
         self.canvas.plot_ann_model(model)
+        
+        self.history_ax.cla()
+        self.history_ax.plot(loss_history)
+        self.history_can.figure.tight_layout()
+        self.history_can.draw()

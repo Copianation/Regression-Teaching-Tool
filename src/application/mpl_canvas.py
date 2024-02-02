@@ -30,8 +30,8 @@ class MPLCanvas(QWidget):
 
         layout = QVBoxLayout(self)
         layout.addWidget(self.can)
-        layout.addWidget(self.plot_btn)
         layout.addLayout(couple_layout(self.show_train, self.show_test))
+        layout.addWidget(self.plot_btn)
         layout.addLayout(couple_layout(self.plot_X_btn, self.plot_Y_btn))
         
         self.ax = self.can.figure.add_subplot(111)

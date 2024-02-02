@@ -1,6 +1,4 @@
 import io
-import time
-import multiprocessing
 from contextlib import redirect_stdout
 from keras import models
 from keras import layers
@@ -18,6 +16,6 @@ def fit(plt_data: PlotData, layer_data, textbox):
 
     buffer = io.StringIO()
     with redirect_stdout(buffer):
-        model.fit(plt_data.x_train, plt_data.y_train, epochs=10, batch_size=32, verbose=2)
+        history = model.fit(plt_data.x_train, plt_data.y_train, epochs=10, batch_size=32, verbose=2)
         textbox.setText(buffer.getvalue())
-    return model
+    return model, history

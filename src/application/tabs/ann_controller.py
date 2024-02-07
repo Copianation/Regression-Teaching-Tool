@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import (QWidget, QPushButton,
+from PyQt5.QtWidgets import (QWidget, QPushButton, QLineEdit,
         QTableWidget, QGridLayout, QGroupBox, QLabel, QTextEdit,
         QVBoxLayout, QComboBox)
 from PyQt5.QtCore import Qt
@@ -25,8 +25,7 @@ class ANNController(QWidget):
         self.fit_btn = btn_factory("fit", self.fit_plt_data)
         self.famile_cbbox = QComboBox()
         self.famile_cbbox.addItems(["linear", "logistic", "poisson"])
-        self.degree_cbbox = QComboBox()
-        self.degree_cbbox.addItems([str(i) for i in range(1,6)])
+        self.hidden_layer_entry = QLineEdit()
         self.summary = QTextEdit()
         font = self.summary.currentFont()
         font.setPointSize(10)
@@ -38,29 +37,34 @@ class ANNController(QWidget):
         self.history_ax = self.history_can.figure.add_subplot(111)
 
     def layout(self):
-        family_label = QLabel("Family=")
-        degree_label = QLabel("Degree=")
+        hidden_layer_label = QLabel("Hidden layer information")
 
-        family_layout = couple_layout(family_label, self.famile_cbbox)
-        degree_layout = couple_layout(degree_label, self.degree_cbbox)
+        hidden_layer_layout = couple_layout(hidden_layer_label, self.hidden_layer_entry)
 
         layout = QVBoxLayout()
         layout.addStretch()
         layout.addWidget(self.history_can)
         layout.addWidget(self.summary)
-        layout.addLayout(family_layout)
-        layout.addLayout(degree_layout)
+        layout.addLayout(hidden_layer_layout)
         layout.addWidget(self.fit_btn)
 
         self.setLayout(layout)
 
     def fit_plt_data(self):
-        model, history = ann.fit(self.plt_data, [10,4,4], self.summary)
+        layer_data = string_to_num_list(self.hidden_layer_entry.text())
+        if layer_data is None:
+            return
+
+        model, history = ann.fit(self.plt_data, layer_data)
         loss_history = history.history['loss']
+
+        self.summary.setText(ann.get_model_summary(model))
 
         self.canvas.plot_ann_model(model)
         
         self.history_ax.cla()
         self.history_ax.plot(loss_history)
+        self.history_ax.set_xlabel("Epoch")
+        self.history_ax.set_ylabel("Loss")
         self.history_can.figure.tight_layout()
         self.history_can.draw()

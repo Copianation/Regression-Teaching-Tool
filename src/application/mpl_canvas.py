@@ -1,5 +1,4 @@
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
-from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT
 from matplotlib.figure import Figure
 import numpy as np
 from sklearn.neural_network import MLPRegressor
@@ -39,22 +38,19 @@ class MPLCanvas(QWidget):
     def plot(self):
         self.ax.cla()
 
-        data = [None, None]
         show_train = self.show_train.isChecked()
         show_test = self.show_test.isChecked()
 
-        if show_test and show_train:
-            data[0] = self.plt_data.get_X_col()
-            data[1] = self.plt_data.get_Y_col()
-        elif show_train:
-            data[0] = self.plt_data.x_train
-            data[1] = self.plt_data.y_train
-        elif show_test:
-            data[0] = self.plt_data.x_test
-            data[1] = self.plt_data.y_test
-            
-        label = f"{self.plt_data.columns()[1]} - {self.plt_data.columns()[0]}"
-        self.ax.scatter(data[0], data[1], label=label)
+        x_label = self.plt_data.columns()[1]
+        y_label = self.plt_data.columns()[0]
+
+        if show_train:
+            self.ax.scatter(self.plt_data.x_train, self.plt_data.y_train, label=f"Train data:{x_label} - {y_label}",
+                            c="blue")
+        if show_test:
+            self.ax.scatter(self.plt_data.x_test, self.plt_data.y_test, label=f"Test data:{x_label} - {y_label}",
+                            c="orange")
+
         self.ax.grid(True)
         self.ax.legend()
         self.can.figure.tight_layout()
@@ -63,18 +59,16 @@ class MPLCanvas(QWidget):
     def plot_X(self):
         self.ax.cla()
 
-        label = f"{self.plt_data.columns()[1]}"
-        self.ax.hist(self.plt_data.get_X_col(), label=label, bins=20)
-        self.ax.legend()
+        self.ax.hist(self.plt_data.get_X_col(), bins=20)
+        self.ax.set_xlabel(self.plt_data.columns()[1])
         self.can.figure.tight_layout()
         self.can.draw()
 
     def plot_Y(self):
         self.ax.cla()
 
-        label = f"{self.plt_data.columns()[0]}"
-        self.ax.hist(self.plt_data.get_Y_col(), label=label, bins=20)
-        self.ax.legend()
+        self.ax.hist(self.plt_data.get_Y_col(), bins=20)
+        self.ax.set_xlabel(self.plt_data.columns()[0])
         self.can.figure.tight_layout()
         self.can.draw()
 

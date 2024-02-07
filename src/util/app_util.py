@@ -35,3 +35,9 @@ def get_selected_columns(table: QTableWidget):
             if table.item(row, col).isSelected():
                 indices.append(col)
     return indices
+
+def string_to_num_list(string: str):
+    try:
+        return [int(s.strip()) for s in string.split(",")]
+    except ValueError:
+        return None
